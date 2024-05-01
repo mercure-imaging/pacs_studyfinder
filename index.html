@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html  data-bs-theme="dark">
+<head>
+    <title>Study Finder</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body class="text-body-emphasis">
+    <div class="container mt-4">
+        <h1 class="mb-4 display-6 fw-semibold text-body-emphasis"><i class="bi bi-search me-2" style="color: #0d6efd;"></i> Research PACS &minus; Study Finder</h1>
+        <form id="myForm">
+            <div class="form-group mb-3">
+                <label for="acc_input">ACC # in Clinical PACS</label>
+                <input type="text" class="form-control mt-1" id="acc_input" placeholder="Accession number in production PACS" required>
+            </div>
+
+            <div class="form-group mb-3">
+                <label for="kid_input">Kerberos ID</label>
+                <input type="text" class="form-control mt-1" id="kid_input" placeholder="Enter the PI's Kerberos ID" required maxlength="10">
+            </div>
+            <div class="form-group mb-3">
+                <label for="project_id">Project Name</label>
+                <input type="text" class="form-control mt-1" id="project_id" placeholder="Enter the project name" required>
+            </div>
+
+            <div class="form-group mb-4">
+                <label for="preset">Preset</label>
+                <select class="form-select mt-1" id="preset">
+                    <option value="" disabled selected></option>
+                </select>
+            </div>
+
+            <div class="btn-toolbar justify-content-between form-group mt-4">
+                <div class="" >
+                <button type="submit" class="btn btn-primary"><i class="bi bi-calculator"></i> Calculate</button>
+                <button class="btn btn-secondary me-3" disabled><i class="bi bi-arrow-counterclockwise"></i> Reset</button>
+                </div>
+                <div class="btn-group" >
+                <button type="submit" class="btn btn-success" disabled id="delete_btn" onclick="savePreset()"><i class="bi bi-floppy"></i> Save</button>
+                <button class="btn btn-danger" disabled><i class="bi bi-trash"></i> Delete</button>
+                </div>
+            </div>                
+        </form>
+        <div class="form-group mt-5">
+            <label for="acc_output">ACC # in Research PACS</label>
+            <div class="input-group mt-1">
+            <input type="text" class="form-control " id="acc_output" placeholder="" readonly>
+            <button class="input-group-text" id="btnGroupAddon" onclick="copyToClipboard()"><i class="bi bi-clipboard"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        var SipHash=function(){"use strict";function r(r,n){var t=r.l+n.l,h={h:r.h+n.h+(t/2>>>31)>>>0,l:t>>>0};r.h=h.h,r.l=h.l}function n(r,n){r.h^=n.h,r.h>>>=0,r.l^=n.l,r.l>>>=0}function t(r,n){var t={h:r.h<<n|r.l>>>32-n,l:r.l<<n|r.h>>>32-n};r.h=t.h,r.l=t.l}function h(r){var n=r.l;r.l=r.h,r.h=n}function e(e,l,o,u){r(e,l),r(o,u),t(l,13),t(u,16),n(l,e),n(u,o),h(e),r(o,l),r(e,u),t(l,17),t(u,21),n(l,o),n(u,e),h(o)}function l(r,n){return r[n+3]<<24|r[n+2]<<16|r[n+1]<<8|r[n]}function o(r,t){"string"==typeof t&&(t=u(t));var h={h:r[1]>>>0,l:r[0]>>>0},o={h:r[3]>>>0,l:r[2]>>>0},i={h:h.h,l:h.l},a=h,f={h:o.h,l:o.l},c=o,s=t.length,v=s-7,g=new Uint8Array(new ArrayBuffer(8));n(i,{h:1936682341,l:1886610805}),n(f,{h:1685025377,l:1852075885}),n(a,{h:1819895653,l:1852142177}),n(c,{h:1952801890,l:2037671283});for(var y=0;y<v;){var d={h:l(t,y+4),l:l(t,y)};n(c,d),e(i,f,a,c),e(i,f,a,c),n(i,d),y+=8}g[7]=s;for(var p=0;y<s;)g[p++]=t[y++];for(;p<7;)g[p++]=0;var w={h:g[7]<<24|g[6]<<16|g[5]<<8|g[4],l:g[3]<<24|g[2]<<16|g[1]<<8|g[0]};n(c,w),e(i,f,a,c),e(i,f,a,c),n(i,w),n(a,{h:0,l:255}),e(i,f,a,c),e(i,f,a,c),e(i,f,a,c),e(i,f,a,c);var _=i;return n(_,f),n(_,a),n(_,c),_}function u(r){if("function"==typeof TextEncoder)return(new TextEncoder).encode(r);r=unescape(encodeURIComponent(r));for(var n=new Uint8Array(r.length),t=0,h=r.length;t<h;t++)n[t]=r.charCodeAt(t);return n}return{hash:o,hash_hex:function(r,n){var t=o(r,n);return("0000000"+t.h.toString(16)).substr(-8)+("0000000"+t.l.toString(16)).substr(-8)},hash_uint:function(r,n){var t=o(r,n);return 4294967296*(2097151&t.h)+t.l},string16_to_key:function(r){var n=u(r);if(16!==n.length)throw Error("Key length must be 16 bytes");var t=new Uint32Array(4);return t[0]=l(n,0),t[1]=l(n,4),t[2]=l(n,8),t[3]=l(n,12),t},string_to_u8:u}}(),module=module||{},exports=module.exports=SipHash;
+    </script>    
+    <script> 
+    
+        const Toast = Swal.mixin({
+            toast: true,
+            position: 'bottom',
+            iconColor: 'white',
+            customClass: {
+                popup: 'colored-toast',
+            },
+            color: "#dee2e6", 
+            background: "#2b3035",            
+            showConfirmButton: false,
+            timer: 1500,
+            timerProgressBar: true,
+        })
+
+        document.getElementById("myForm").addEventListener("submit", function(event) {
+            event.preventDefault(); // Prevent form submission
+
+            // Get input values
+            var acc_input = document.getElementById("acc_input").value.toLowerCase();
+            var kid_input = document.getElementById("kid_input").value.toLowerCase();
+            var project_id = document.getElementById("project_id").value.toLowerCase();
+
+            // Perform calculation
+            var key = SipHash.string16_to_key(kid_input.padEnd(16)),
+            message = project_id+"-"+acc_input,
+            hash_hex = SipHash.hash_hex(key, message);
+
+            var result = hash_hex;
+
+            // Display result
+            document.getElementById("acc_output").value = result;
+            document.getElementById("delete_btn").disabled = false;
+        });
+
+        function savePreset() {
+            Swal.fire({
+            title: "Preset Name",
+            input: "text",
+            inputLabel: "Enter a name for the preset",
+            inputValue: "",
+            input: "text",
+            buttonsStyling: false,
+            customClass: {
+                confirmButton: 'btn btn-primary me-2',
+                cancelButton: 'btn btn-secondary',
+            },           
+            color: "#FFFFFF", 
+            background: "#212529",
+            showCancelButton: true,
+            inputValidator: (value) => {
+                if (!value) {
+                    return "You need to write something!";
+                }
+            }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    var preset = document.getElementById("kid_input").value+"#"+document.getElementById("project_id").value;
+                    preset = preset.toLowerCase();
+                    addOption(result.value, preset);
+                } 
+            });
+        }
+
+        // // Function to load options from local storage
+        // function loadOptions() {
+        //     var options = localStorage.getItem("selectOptions");
+
+        //     if (options) {
+        //         var select = document.getElementById("preset");
+        //         select.innerHTML = options;
+        //         var sortedOptions = Array.from(select.options).sort((a, b) => a.text.localeCompare(b.text));
+        //         select.innerHTML = "";
+        //         sortedOptions.forEach(option => select.add(option));
+        //     }
+        // }
+
+        // Function to add an option to the select box and save it in local storage
+        function addOption(name, option) {
+            var select = document.getElementById("preset");
+            var newOption = document.createElement("option");
+            newOption.value = option;
+            newOption.text = name;
+            select.add(newOption);
+
+            // Save options in local storage
+            //localStorage.setItem("selectOptions", select.innerHTML);
+        }
+
+        // // Function to delete an option from the select box and remove it from local storage
+        // function deleteOption(option) {
+        //     var select = document.getElementById("preset");
+        //     var options = select.options;
+        //     for (var i = 0; i < options.length; i++) {
+        //         if (options[i].value === option) {
+        //             select.remove(i);
+        //             break;
+        //         }
+        //     }
+
+        //     // Save updated options in local storage
+        //     localStorage.setItem("selectOptions", select.innerHTML);
+        // }
+
+        // Function to copy the result to the clipboard
+        function copyToClipboard() {
+            var copyText = document.getElementById("acc_output");
+            copyText.select();
+            copyText.setSelectionRange(0, 99999); /* For mobile devices */
+            document.execCommand("copy");
+            Toast.fire({
+                icon: 'success',
+                title: 'ACC # copied to clipboard!',
+            })
+        }
+
+    </script>
+</body>
+</html>
