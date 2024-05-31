@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html  data-bs-theme="dark">
+<html data-bs-theme="dark">
 <head>
     <title>Study Finder</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
@@ -9,45 +9,45 @@
 </head>
 <body class="text-body-emphasis">
     <div class="container mt-4">
-        <h1 class="mb-4 display-6 fw-semibold text-body-emphasis"><i class="bi bi-search me-2" style="color: #0d6efd;"></i> Research PACS &minus; Study Finder</h1>
+        <h2 class="mb-4 display-8 fw-semibold text-body-emphasis">Research PACS &minus; Study Finder</h2>
         <form id="myForm">
             <div class="form-group mb-3">
                 <label for="acc_input">ACC # in Clinical PACS</label>
-                <input type="text" class="form-control mt-1" id="acc_input" placeholder="Accession number in production PACS" required>
+                <textarea type="text" class="form-control mt-1" id="acc_input" placeholder="Accession # in production PACS" required rows="1" onKeyDown="clearResult()"></textarea>
             </div>
 
             <div class="form-group mb-3">
                 <label for="kid_input">Kerberos ID</label>
-                <input type="text" class="form-control mt-1" id="kid_input" placeholder="Enter the PI's Kerberos ID" required maxlength="10">
+                <input type="text" class="form-control mt-1" id="kid_input" placeholder="Enter the PI's Kerberos ID" required maxlength="10" onKeyDown="clearResult()">
             </div>
             <div class="form-group mb-3">
                 <label for="project_id">Project Name</label>
-                <input type="text" class="form-control mt-1" id="project_id" placeholder="Enter the project name" required>
+                <input type="text" class="form-control mt-1" id="project_id" placeholder="Enter the project name" required onKeyDown="clearResult()">
             </div>
 
             <div class="form-group mb-4">
                 <label for="preset">Preset</label>
-                <select class="form-select mt-1" id="preset">
+                <select class="form-select mt-1" id="preset" onChange="presetSelect(this.selectedIndex);">
                     <option value="" disabled selected></option>
                 </select>
             </div>
 
             <div class="btn-toolbar justify-content-between form-group mt-4">
                 <div class="" >
-                <button type="submit" class="btn btn-primary"><i class="bi bi-calculator"></i> Calculate</button>
-                <button class="btn btn-secondary me-3" disabled><i class="bi bi-arrow-counterclockwise"></i> Reset</button>
+                <button type="submit" id="calc_btn" class="btn btn-primary"><i class="bi bi-calculator"></i> Calculate</button>
+                <button type="button" class="btn btn-secondary me-3" onclick="resetData()"><i class="bi bi-arrow-counterclockwise"></i> Reset</button>
                 </div>
                 <div class="btn-group" >
-                <button type="submit" class="btn btn-success" disabled id="delete_btn" onclick="savePreset()"><i class="bi bi-floppy"></i> Save</button>
-                <button class="btn btn-danger" disabled><i class="bi bi-trash"></i> Delete</button>
+                <button type="button" class="btn btn-success" disabled id="save_btn" onclick="savePreset()"><i class="bi bi-floppy"></i> Save</button>
+                <button type="button" class="btn btn-danger" disabled id="delete_btn" onclick="deletePreset()"><i class="bi bi-trash"></i> Delete</button>
                 </div>
             </div>                
         </form>
-        <div class="form-group mt-5">
+        <div class="form-group" style="margin-top: 30px;">
             <label for="acc_output">ACC # in Research PACS</label>
             <div class="input-group mt-1">
-            <input type="text" class="form-control " id="acc_output" placeholder="" readonly>
-            <button class="input-group-text" id="btnGroupAddon" onclick="copyToClipboard()"><i class="bi bi-clipboard"></i></button>
+                <textarea type="text" class="form-control " id="acc_output" placeholder="" readonly rows="1"></textarea>
+                <button class="input-group-text" id="btnGroupAddon" onclick="copyToClipboard()"><i class="bi bi-clipboard"></i></button>
             </div>
         </div>
     </div>
@@ -79,17 +79,36 @@
             var kid_input = document.getElementById("kid_input").value.toLowerCase();
             var project_id = document.getElementById("project_id").value.toLowerCase();
 
-            // Perform calculation
-            var key = SipHash.string16_to_key(kid_input.padEnd(16)),
-            message = project_id+"-"+acc_input,
-            hash_hex = SipHash.hash_hex(key, message);
+            var acc_inputs = acc_input.split(/\r?\n|\r|\n/g);
 
-            var result = hash_hex;
+            // Perform calculation
+            var key = SipHash.string16_to_key(kid_input.padEnd(16));
+            var result = "";
+
+            for (var i = 0; i < acc_inputs.length; i++) {
+                message = project_id+"-"+acc_inputs[i].trim(),
+                hash_hex = SipHash.hash_hex(key, message);
+                result += hash_hex;
+                if (i < acc_inputs.length - 1) {
+                    result += "\n";
+                }
+            }
 
             // Display result
             document.getElementById("acc_output").value = result;
-            document.getElementById("delete_btn").disabled = false;
+
+            acc_output_textarea = document.getElementById("acc_output");
+            acc_output_textarea.style.height = "";
+            acc_output_textarea.style.height = Math.min(acc_output_textarea.scrollHeight, 300) + "px";            
+
+            document.getElementById("save_btn").disabled = false;
         });
+
+        var acc_input_textarea = document.getElementById("acc_input");
+        acc_input_textarea.oninput = function() {
+            acc_input_textarea.style.height = "";
+            acc_input_textarea.style.height = Math.min(acc_input_textarea.scrollHeight, 300) + "px";
+        };
 
         function savePreset() {
             Swal.fire({
@@ -120,45 +139,81 @@
             });
         }
 
-        // // Function to load options from local storage
-        // function loadOptions() {
-        //     var options = localStorage.getItem("selectOptions");
+        function deletePreset() {
+            Swal.fire({
+                title: 'Delete selected preset?',
+                showDenyButton: true,
+                confirmButtonText: 'Yes',
+                denyButtonText: 'No',
+                buttonsStyling: false,
+                customClass: {
+                    confirmButton: 'btn btn-primary me-2',
+                    denyButton: 'btn btn-secondary',
+                },           
+                color: "#FFFFFF", 
+                background: "#212529",                
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        deleteOption();
+                    }
+                } 
+            );
+        }
 
-        //     if (options) {
-        //         var select = document.getElementById("preset");
-        //         select.innerHTML = options;
-        //         var sortedOptions = Array.from(select.options).sort((a, b) => a.text.localeCompare(b.text));
-        //         select.innerHTML = "";
-        //         sortedOptions.forEach(option => select.add(option));
-        //     }
-        // }
+        function presetSelect(index) {
+            currentValue = document.getElementById("preset").value;
+
+            if ((index > 0) && (currentValue != "")) {
+                document.getElementById("delete_btn").disabled = false;
+                document.getElementById("project_id").value = "YOYO";
+                document.getElementById("kid_input").value = "Yadda";
+                if (document.getElementById("acc_input").value == "") {
+                    document.getElementById("acc_input").focus();
+                } else {
+                    document.getElementById("calc_btn").click();
+                }
+            } else {
+                document.getElementById("delete_btn").disabled = true;
+            }            
+        }
+
+        // Function to load options from local storage
+        function loadOptions() {
+            var options = localStorage.getItem("presets");
+
+            if (options) {
+                var select = document.getElementById("preset");
+                select.innerHTML += options;
+                var sortedOptions = Array.from(select.options).sort((a, b) => a.text.localeCompare(b.text));
+                select.innerHTML = "";
+                sortedOptions.forEach(option => select.add(option));
+            }
+        }
 
         // Function to add an option to the select box and save it in local storage
         function addOption(name, option) {
             var select = document.getElementById("preset");
             var newOption = document.createElement("option");
             newOption.value = option;
-            newOption.text = name;
+            newOption.text = name + " [" + option + "]";
             select.add(newOption);
 
             // Save options in local storage
-            //localStorage.setItem("selectOptions", select.innerHTML);
+            localStorage.setItem("presets", select.innerHTML);
         }
 
-        // // Function to delete an option from the select box and remove it from local storage
-        // function deleteOption(option) {
-        //     var select = document.getElementById("preset");
-        //     var options = select.options;
-        //     for (var i = 0; i < options.length; i++) {
-        //         if (options[i].value === option) {
-        //             select.remove(i);
-        //             break;
-        //         }
-        //     }
+        // Function to delete an option from the select box and remove it from local storage
+        function deleteOption() {
+            var select = document.getElementById("preset");
+            var options = select.options;
+            var currentIndex = select.selectedIndex;
+            if (currentIndex > 0) {
+                select.remove(currentIndex);
+            }
 
-        //     // Save updated options in local storage
-        //     localStorage.setItem("selectOptions", select.innerHTML);
-        // }
+            // Save updated options in local storage
+            localStorage.setItem("presets", select.innerHTML);
+        }
 
         // Function to copy the result to the clipboard
         function copyToClipboard() {
@@ -171,6 +226,23 @@
                 title: 'ACC # copied to clipboard!',
             })
         }
+
+        function resetData() {
+            document.getElementById("acc_input").value = "";
+            document.getElementById("kid_input").value = "";
+            document.getElementById("project_id").value = "";
+            document.getElementById("delete_btn").disabled = true;
+            document.getElementById("save_btn").disabled = true;
+            document.getElementById("preset").value = 0;
+        }
+
+        function clearResult() {
+            document.getElementById("acc_output").value = "";
+        }
+
+        (function () {
+            loadOptions();
+        })();
 
     </script>
 </body>
