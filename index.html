@@ -165,8 +165,12 @@
 
             if ((index > 0) && (currentValue != "")) {
                 document.getElementById("delete_btn").disabled = false;
-                document.getElementById("project_id").value = "YOYO";
-                document.getElementById("kid_input").value = "Yadda";
+                entries = currentValue.split("#");
+                if (entries.length < 2) {
+                    return;
+                }
+                document.getElementById("kid_input").value = entries[0];
+                document.getElementById("project_id").value = entries[1];
                 if (document.getElementById("acc_input").value == "") {
                     document.getElementById("acc_input").focus();
                 } else {
@@ -186,7 +190,8 @@
                 select.innerHTML += options;
                 var sortedOptions = Array.from(select.options).sort((a, b) => a.text.localeCompare(b.text));
                 select.innerHTML = "";
-                sortedOptions.forEach(option => select.add(option));
+                counter = 0;
+                sortedOptions.forEach(option => { if ((counter > 0) && (option.name != "")) { select.add(option); } counter++; });
             }
         }
 
@@ -195,7 +200,7 @@
             var select = document.getElementById("preset");
             var newOption = document.createElement("option");
             newOption.value = option;
-            newOption.text = name + " [" + option + "]";
+            newOption.text = name + " (" + option + ")";
             select.add(newOption);
 
             // Save options in local storage
