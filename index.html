@@ -88,7 +88,7 @@
             for (var i = 0; i < acc_inputs.length; i++) {
                 message = project_id+"-"+acc_inputs[i].trim(),
                 hash_hex = SipHash.hash_hex(key, message);
-                result += hash_hex;
+                result += hash_hex.toUpperCase();
                 if (i < acc_inputs.length - 1) {
                     result += "\n";
                 }
